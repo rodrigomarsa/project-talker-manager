@@ -1,13 +1,15 @@
 const express = require('express');
-const fs = require('fs').promises;
-const path = require('path');
+// const fs = require('fs').promises;
+// const path = require('path');
+const readFile = require('./utils/fsUtils');
+const generateToken = require('./utils/generateToken');
 
 const app = express();
 app.use(express.json());
 
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
-const talkersPath = path.resolve(__dirname, './talker.json');
+// const talkersPath = path.resolve(__dirname, './talker.json');
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
@@ -17,15 +19,6 @@ app.get('/', (_request, response) => {
 app.listen(PORT, () => {
   console.log('Online');
 });
-
-const readFile = async () => {
-  try {
-    const data = await fs.readFile(talkersPath, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error(error.message);
-  }
-};
 
 app.get('/talker', async (_req, res) => {
   try {
@@ -47,4 +40,13 @@ app.get('/talker/:id', async (req, res) => {
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
+});
+
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  if ([email, password].includes(undefined)) {
+    return res.status(401).json({ message: 'Campos ausentes!' });
+    }
+  const token = generateToken();
+  return res.status(200).json({ token });
 });
