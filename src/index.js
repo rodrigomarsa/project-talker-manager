@@ -3,7 +3,7 @@ const validateEmail = require('./middlewares/validateEmail');
 const validatePassword = require('./middlewares/validatePassword');
 // const fs = require('fs').promises;
 // const path = require('path');
-const readFile = require('./utils/fsUtils');
+const { readFile } = require('./utils/fsUtils');
 const generateToken = require('./utils/generateToken');
 
 const app = express();
@@ -44,11 +44,11 @@ app.get('/talker/:id', async (req, res) => {
   }
 });
 
-app.post('/login', validatePassword, validateEmail, async (req, res) => {
-  const { email, password } = req.body;
-  if ([email, password].includes(undefined)) {
-    return res.status(401).json({ message: 'Campos ausentes!' });
-    }
+app.post('/login', validateEmail, validatePassword, (req, res) => {
+  // const { email, password } = req.body;
+  // if ([email, password].includes(undefined)) {
+  //   return res.status(401).json({ message: 'Campos ausentes!' });
+  //   }
   const token = generateToken();
   return res.status(200).json({ token });
 });
