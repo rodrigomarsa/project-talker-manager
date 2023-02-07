@@ -12,4 +12,21 @@ async function readFile() {
   }
 }
 
-module.exports = { readFile };
+async function writeFile(newTalker) {
+  try {
+    const oldTalkers = await readFile();
+    const newTalkerWithId = { id: oldTalkers[oldTalkers.length - 1].id + 1, ...newTalker };
+    // oldTalkers.push(newTalkerWithId);
+    // const allTalkers = JSON.stringify(oldTalkers, null, 2);
+    const allTalkers = JSON.stringify([...oldTalkers, newTalkerWithId], null, 2);
+    await fs.writeFile(talkersPath, allTalkers);
+    return newTalkerWithId;
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+module.exports = {
+  readFile,
+  writeFile,
+};

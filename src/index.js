@@ -1,9 +1,15 @@
 const express = require('express');
+const auth = require('./middlewares/auth');
+const validateAge = require('./middlewares/validateAge');
 const validateEmail = require('./middlewares/validateEmail');
+const validateName = require('./middlewares/validateName');
 const validatePassword = require('./middlewares/validatePassword');
+const validateTalk = require('./middlewares/validateTalk');
+const validateRate = require('./middlewares/validateTalkRate');
+const validateWatchedAt = require('./middlewares/validateWatchedAt');
 // const fs = require('fs').promises;
 // const path = require('path');
-const { readFile } = require('./utils/fsUtils');
+const { readFile, writeFile } = require('./utils/fsUtils');
 const generateToken = require('./utils/generateToken');
 
 const app = express();
@@ -44,11 +50,24 @@ app.get('/talker/:id', async (req, res) => {
   }
 });
 
-app.post('/login', validateEmail, validatePassword, (req, res) => {
-  // const { email, password } = req.body;
-  // if ([email, password].includes(undefined)) {
-  //   return res.status(401).json({ message: 'Campos ausentes!' });
-  //   }
+app.post('/login', validateEmail, validatePassword, (_req, res) => {
   const token = generateToken();
   return res.status(200).json({ token });
+});
+
+app.post('/talker',
+auth,
+validateName,
+validateAge,
+validateTalk,
+validateWatchedAt,
+validateRate,
+async (req, res) => {
+  try {
+    const newTalker = req.body;
+    const newTalkerWithId = await writeFile(newTalker);
+    return res.status(201).json(newTalkerWithId);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
 });
